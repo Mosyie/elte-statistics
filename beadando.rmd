@@ -1,0 +1,343 @@
+---
+title: "Statisztika Beadandó 2024"
+output: html_document
+---
+
+## Szerzők
+
+```{r,, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+authors <- data.frame(
+  Név = c("Mosonyi Martin", "Ócsai Máté Zsigmond"),
+  Neptun = c("KJCROC", "COQFUY")
+)
+kable(authors, col.names = c("Név", "Neptun"), align = "c")
+```
+
+## Feladat leírása
+
+Átfogó statisztikai elemzés készítése, melynek alapja választási eredmények és települési jellemzők vizsgálata,
+annak összefüggései.
+
+> Általunk választott választás: __Európai parlamenti választás 2019.__
+
+> Általunk válaszott települési jellemzők (2019-es adatok): 
+
+1. Állandó népesség; 18-59 évesek (dec. 31.) (fő)
+
+2. 65 év feletti népesség, 100 fő 0-14 éves korú népesség (fő)
+
+3. Általános iskolai végzettségű nyilvántartott álláskeresők (fő)
+
+
+A statisztikai elemzés kitér:
+
+- adatok betöltése, átalakítása
+
+- adattisztítás, vagyis hiányzó/hibás/nagyon kiugró értékek azonosítása, javítása, ezen lépések dokumentálása
+
+- alapstatisztikák, ezen mutatók értelmezése, grafikai eszközök használata
+
+- konfidenciainterrvallum készítése, értelmezése
+
+- hipotézisek felállítása, feltételezések bemutatása, próbák elvégzése, eredmények értelmezése
+
+- konklúzió, az egész elemezés során kapott értékek áttekintése, érdekes összefüggések kiemelése
+
+
+## Adatok javítása
+
+Feladataink közé tartozott az adatok javítása.
+
+Elsősorban, a hiányzó adatokat pótoltuk, ilyen volt sok esetben, az _általános iskolai végzettégű nyilvántartott álláskeresők_ esetében. Ezekhez mindenhova **%-os** módon helyettesítettünk a kiinduló pont az adott nyilvántarott adat volt (**Aba** alapján): 
+
+```{r, echo=FALSE}
+library(knitr)
+data <- data.frame(
+  population = "2832",
+  jobseekerWithPrimaryEducation = "38"
+)
+kable(data, col.names = c("Állandó népesség (18-59) évesek", "Általános iskolai végzettségű nyilvántartott álláskeresők"), align = "c")
+```
+
+Azaz: átlagosan 74 emberre (18-59 között) jut 1 olyan álláskereső akinek általános iskolai végzettsége van.
+
+Ahol, ezen adat javításra került:
+
+[Táblázat kirajzoló package:]: https://tibble.tidyverse.org/reference/tibble-package.html
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tibble)
+library(knitr)
+library(kableExtra)
+
+data <- tibble(
+  'Város név' = character(),
+  'Lakosság (18-59)' = numeric(),
+  'Javított álláskeresők száma' = numeric()
+)
+
+
+data <- add_row(data, 'Város név' = "Ábrahámhegy", 'Lakosság (18-59)' = 277, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Almásháza", 'Lakosság (18-59)' = 54, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Alsótelekes", 'Lakosság (18-59)' = 75, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Apácatorna", 'Lakosság (18-59)' = 82, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Arka", 'Lakosság (18-59)' = 46, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Árpás", 'Lakosság (18-59)' = 149, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Baglad", 'Lakosság (18-59)' = 19, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Bágyogszovát", 'Lakosság (18-59)' = 749, 'Javított álláskeresők száma'=10)
+data <- add_row(data, 'Város név' = "Bakonygyirót", 'Lakosság (18-59)' = 87, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Bakonykúti", 'Lakosság (18-59)' = 91, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Bakonyság", 'Lakosság (18-59)' = 33, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Balatonszepezd", 'Lakosság (18-59)' = 205, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Baskó", 'Lakosság (18-59)' = 111, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Becskeháza", 'Lakosság (18-59)' = 18, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Belecska", 'Lakosság (18-59)' = 227, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Bezenye", 'Lakosság (18-59)' = 826, 'Javított álláskeresők száma'=11)
+data <- add_row(data, 'Város név' = "Bodmér", 'Lakosság (18-59)' = 131, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Bodonhely", 'Lakosság (18-59)' = 185, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Bodorfa", 'Lakosság (18-59)' = 63, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Bogyoszló", 'Lakosság (18-59)' = 353, 'Javított álláskeresők száma'=5)
+data <- add_row(data, 'Város név' = "Bokor", 'Lakosság (18-59)' = 60, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Bonyhádvarasd", 'Lakosság (18-59)' = 256, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Bozsok", 'Lakosság (18-59)' = 209, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Bózsva", 'Lakosság (18-59)' = 114, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Bögöt", 'Lakosság (18-59)' = 225, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Bősárkány", 'Lakosság (18-59)' = 1235, 'Javított álláskeresők száma'=17)
+data <- add_row(data, 'Város név' = "Búcsúszentlászló", 'Lakosság (18-59)' = 440, 'Javított álláskeresők száma'=6)
+data <- add_row(data, 'Város név' = "Budajenő", 'Lakosság (18-59)' = 1203, 'Javított álláskeresők száma'=16)
+data <- add_row(data, 'Város név' = "Cakóháza", 'Lakosság (18-59)' = 27, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Chernelházadamonya", 'Lakosság (18-59)' = 123, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Csáfordjánosfa", 'Lakosság (18-59)' = 108, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Csempeszkopács", 'Lakosság (18-59)' = 213, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Csér", 'Lakosság (18-59)' = 19, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Cserhátszentiván", 'Lakosság (18-59)' = 50, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Csöde", 'Lakosság (18-59)' = 42, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Dáka", 'Lakosság (18-59)' = 432, 'Javított álláskeresők száma'=6)
+data <- add_row(data, 'Város név' = "Debréte", 'Lakosság (18-59)' = 10, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Dénesfa", 'Lakosság (18-59)' = 235, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Dobronhegy", 'Lakosság (18-59)' = 87, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Döbröce", 'Lakosság (18-59)' = 48, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Döbrönte", 'Lakosság (18-59)' = 174, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Dör", 'Lakosság (18-59)' = 339, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Döröske", 'Lakosság (18-59)' = 58, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Dötk", 'Lakosság (18-59)' = 21, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Duka", 'Lakosság (18-59)' = 149, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Dunaremete", 'Lakosság (18-59)' = 145, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Edve", 'Lakosság (18-59)' = 54, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Fehértó", 'Lakosság (18-59)' = 286, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Felsőcsatár", 'Lakosság (18-59)' = 298, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Felsőszenterzsébet", 'Lakosság (18-59)' = 7, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Fenyőfő", 'Lakosság (18-59)' = 66, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Ferencszállás", 'Lakosság (18-59)' = 380, 'Javított álláskeresők száma'=5)
+data <- add_row(data, 'Város név' = "Fertőendréd", 'Lakosság (18-59)' = 378, 'Javított álláskeresők száma'=5)
+data <- add_row(data, 'Város név' = "Fertőhomok", 'Lakosság (18-59)' = 494, 'Javított álláskeresők száma'=7)
+data <- add_row(data, 'Város név' = "Fűzvölgy", 'Lakosság (18-59)' = 79, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Gagyapáti", 'Lakosság (18-59)' = 38, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Galvács", 'Lakosság (18-59)' = 45, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Garáb", 'Lakosság (18-59)' = 28, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Gombosszeg", 'Lakosság (18-59)' = 33, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Gosztola", 'Lakosság (18-59)' = 33, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Gömörszőlős", 'Lakosság (18-59)' = 49, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Gyalóka", 'Lakosság (18-59)' = 31, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Gyóró", 'Lakosság (18-59)' = 215, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Győrladamér", 'Lakosság (18-59)' = 1088, 'Javított álláskeresők száma'=15)
+data <- add_row(data, 'Város név' = "Győrság", 'Lakosság (18-59)' = 913, 'Javított álláskeresők száma'=12)
+data <- add_row(data, 'Város név' = "Gyűrűs", 'Lakosság (18-59)' = 64, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Hásságy", 'Lakosság (18-59)' = 156, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Hegyesd", 'Lakosság (18-59)' = 97, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Hegyháthodász", 'Lakosság (18-59)' = 78, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Hegyhátsál", 'Lakosság (18-59)' = 84, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Hegyhátszentmárton", 'Lakosság (18-59)' = 38, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Hegykő", 'Lakosság (18-59)' = 872, 'Javított álláskeresők száma'=12)
+data <- add_row(data, 'Város név' = "Hejce", 'Lakosság (18-59)' = 159, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Hetyefő", 'Lakosság (18-59)' = 50, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Hidegkút", 'Lakosság (18-59)' = 273, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Hidegség", 'Lakosság (18-59)' = 234, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Horvátlövő", 'Lakosság (18-59)' = 35, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Hosztót", 'Lakosság (18-59)' = 32, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Iborfia", 'Lakosság (18-59)' = 6, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Ikervár", 'Lakosság (18-59)' = 1025, 'Javított álláskeresők száma'=14)
+data <- add_row(data, 'Város név' = "Iklanberény", 'Lakosság (18-59)' = 24, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Ikrény", 'Lakosság (18-59)' = 165, 'Javított álláskeresők száma'=16)
+data <- add_row(data, 'Város név' = "Imola", 'Lakosság (18-59)' = 61, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Kallósd", 'Lakosság (18-59)' = 46, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Kány", 'Lakosság (18-59)' = 32, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Kányavár", 'Lakosság (18-59)' = 75, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Kára", 'Lakosság (18-59)' = 25, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Károlyháza", 'Lakosság (18-59)' = 6, 'Javított álláskeresők száma'=5)
+data <- add_row(data, 'Város név' = "Katafa", 'Lakosság (18-59)' = 205, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Kékkút", 'Lakosság (18-59)' = 41, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Kemeneskápolna", 'Lakosság (18-59)' = 53, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Kemenessömjén", 'Lakosság (18-59)' = 354, 'Javított álláskeresők száma'=5)
+data <- add_row(data, 'Város név' = "Kemestaródfa", 'Lakosság (18-59)' = 135, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Kenéz", 'Lakosság (18-59)' = 164, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Keresztéte", 'Lakosság (18-59)' = 18, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Kerkefalva", 'Lakosság (18-59)' = 67, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Kerkáskápolna", 'Lakosság (18-59)' = 35, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Kerkaszentkirály", 'Lakosság (18-59)' = 121, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Királyszentiván", 'Lakosság (18-59)' = 310, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Kisbabot", 'Lakosság (18-59)' = 144, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Kisbajcs", 'Lakosság (18-59)' = 532, 'Javított álláskeresők száma'=7)
+data <- add_row(data, 'Város név' = "Kisbárány", 'Lakosság (18-59)' = 92, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Kisbodak", 'Lakosság (18-59)' = 212, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Kisdér", 'Lakosság (18-59)' = 68, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Kisfüzes", 'Lakosság (18-59)' = 73, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Kiskutas", 'Lakosság (18-59)' = 124, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Kisrákos", 'Lakosság (18-59)' = 100, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Kisvásárhely", 'Lakosság (18-59)' = 29, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Komlódtótfalu", 'Lakosság (18-59)' = 98, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Kovácsszénája", 'Lakosság (18-59)' = 48, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Kozárd", 'Lakosság (18-59)' = 95, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Kozmadombja", 'Lakosság (18-59)' = 16, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Ligetfalva", 'Lakosság (18-59)' = 27, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Lipót", 'Lakosság (18-59)' = 405, 'Javított álláskeresők száma'=5)
+data <- add_row(data, 'Város név' = "Litka", 'Lakosság (18-59)' = 32, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Lócs", 'Lakosság (18-59)' = 56, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Lórév", 'Lakosság (18-59)' = 180, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Lovas", 'Lakosság (18-59)' = 256, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Maglóca", 'Lakosság (18-59)' = 56, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Magyarkeresztúr", 'Lakosság (18-59)' = 277, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Magyarszecsőd", 'Lakosság (18-59)' = 269, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Magyarszombatfa", 'Lakosság (18-59)' = 135, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Márokföld", 'Lakosság (18-59)' = 32, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Mecsér", 'Lakosság (18-59)' = 379, 'Javított álláskeresők száma'=5)
+data <- add_row(data, 'Város név' = "Mérges", 'Lakosság (18-59)' = 62, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Mesteri", 'Lakosság (18-59)' = 116, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Mogyorósbánya", 'Lakosság (18-59)' = 493, 'Javított álláskeresők száma'=5)
+data <- add_row(data, 'Város név' = "Monoszló", 'Lakosság (18-59)' = 70, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Mórichida", 'Lakosság (18-59)' = 476, 'Javított álláskeresők száma'=5)
+data <- add_row(data, 'Város név' = "Nagybajcs", 'Lakosság (18-59)' = 580, 'Javított álláskeresők száma'=8)
+data <- add_row(data, 'Város név' = "Nagymizdó", 'Lakosság (18-59)' = 56, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Nagyrákos", 'Lakosság (18-59)' = 146, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Nagyvejke", 'Lakosság (18-59)' = 74, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Nemescsó", 'Lakosság (18-59)' = 178, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Nemeskér", 'Lakosság (18-59)' = 115, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Nemeskocs", 'Lakosság (18-59)' = 196, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Nemesládony", 'Lakosság (18-59)' = 70, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Nemesmedves", 'Lakosság (18-59)' = 18, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Nemessándorháza", 'Lakosság (18-59)' = 184, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Németbánya", 'Lakosság (18-59)' = 62, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Németfalu", 'Lakosság (18-59)' = 116, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Nóráp", 'Lakosság (18-59)' = 122, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Nyalka", 'Lakosság (18-59)' = 266, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Óbánya", 'Lakosság (18-59)' = 74, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Óbudavár", 'Lakosság (18-59)' = 31, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Ólmód", 'Lakosság (18-59)' = 60, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Orbányosfa", 'Lakosság (18-59)' = 69, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Osli", 'Lakosság (18-59)' = 497, 'Javított álláskeresők száma'=5)
+data <- add_row(data, 'Város név' = "Örvényes", 'Lakosság (18-59)' = 86, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Ősagárd", 'Lakosság (18-59)' = 174, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Pácsony", 'Lakosság (18-59)' = 182, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Páli", 'Lakosság (18-59)' = 283, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Pálusvörösmart", 'Lakosság (18-59)' = 322, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Parádsasvár", 'Lakosság (18-59)' = 193, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Pásztori", 'Lakosság (18-59)' = 259, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Patca", 'Lakosság (18-59)' = 34, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Peresznye", 'Lakosság (18-59)' = 334, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Pereszteg", 'Lakosság (18-59)' = 855, 'Javított álláskeresők száma'=12)
+data <- add_row(data, 'Város név' = "Porpác", 'Lakosság (18-59)' = 76, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Porrogszentpál", 'Lakosság (18-59)' = 48, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Pórszombat", 'Lakosság (18-59)' = 150, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Potyond", 'Lakosság (18-59)' = 64, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Pusztaapáti", 'Lakosság (18-59)' = 16, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Pusztacsalád", 'Lakosság (18-59)' = 155, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Pusztacsó", 'Lakosság (18-59)' = 99, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Rábacsanak", 'Lakosság (18-59)' = 306, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Rábapordány", 'Lakosság (18-59)' = 559, 'Javított álláskeresők száma'=8)
+data <- add_row(data, 'Város név' = "Rábasebes", 'Lakosság (18-59)' = 44, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Rábaszentandrás", 'Lakosság (18-59)' = 246, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Rábcakapi", 'Lakosság (18-59)' = 98, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Ramocsa", 'Lakosság (18-59)' = 20, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Rátót", 'Lakosság (18-59)' = 143, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Remeteszőlős", 'Lakosság (18-59)' = 578, 'Javított álláskeresők száma'=8)
+data <- add_row(data, 'Város név' = "Repceszemere", 'Lakosság (18-59)' = 163, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Répceszentgyörgy", 'Lakosság (18-59)' = 71, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Répcevis", 'Lakosság (18-59)' = 199, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Románd", 'Lakosság (18-59)' = 186, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Röjtökmuszaj", 'Lakosság (18-59)' = 240, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Sajtoskál", 'Lakosság (18-59)' = 201, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Salföld", 'Lakosság (18-59)' = 32, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Salköveskút", 'Lakosság (18-59)' = 305, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Sénye", 'Lakosság (18-59)' = 38, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Sérsekszőlős", 'Lakosság (18-59)' = 86, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Sima", 'Lakosság (18-59)' = 27, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Sokorópátka", 'Lakosság (18-59)' = 634, 'Javított álláskeresők száma'=9)
+data <- add_row(data, 'Város név' = "Sóly", 'Lakosság (18-59)' = 323, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Somlóvecse", 'Lakosság (18-59)' = 45, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Söpte", 'Lakosság (18-59)' = 477, 'Javított álláskeresők száma'=6)
+data <- add_row(data, 'Város név' = "Söréd", 'Lakosság (18-59)' = 334, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Szaknyér", 'Lakosság (18-59)' = 26, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Szalafő", 'Lakosság (18-59)' = 112, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Szántód", 'Lakosság (18-59)' = 351, 'Javított álláskeresők száma'=4)
+data <- add_row(data, 'Város név' = "Szarvaskend", 'Lakosság (18-59)' = 138, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Szatta", 'Lakosság (18-59)' = 42, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Szergény", 'Lakosság (18-59)' = 146, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Szijártóháza", 'Lakosság (18-59)' = 16, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Szilvágy", 'Lakosság (18-59)' = 94, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Szilvás", 'Lakosság (18-59)' = 90, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Tagyon", 'Lakosság (18-59)' = 57, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Tarnaszentmária", 'Lakosság (18-59)' = 130, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Tarrós", 'Lakosság (18-59)' = 51, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Teresztenye", 'Lakosság (18-59)' = 13, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Tésa", 'Lakosság (18-59)' = 60, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Tokorcs", 'Lakosság (18-59)' = 210, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Tornabarakony", 'Lakosság (18-59)' = 11, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Tornakápolna", 'Lakosság (18-59)' = 18, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Újbarok", 'Lakosság (18-59)' = 251, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Vadosfa", 'Lakosság (18-59)' = 53, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Valkonya", 'Lakosság (18-59)' = 41, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Vámoscsalád", 'Lakosság (18-59)' = 161, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Várbalog", 'Lakosság (18-59)' = 215, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Varbóc", 'Lakosság (18-59)' = 40, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Várda", 'Lakosság (18-59)' = 245, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Vásárosfalu", 'Lakosság (18-59)' = 595, 'Javított álláskeresők száma'=9)
+data <- add_row(data, 'Város név' = "Vasasszonyfa", 'Lakosság (18-59)' = 222, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Vasegerszeg", 'Lakosság (18-59)' = 175, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Vaskeresztes", 'Lakosság (18-59)' = 187, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Vászoly", 'Lakosság (18-59)' = 146, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Velem", 'Lakosság (18-59)' = 223, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Vének", 'Lakosság (18-59)' = 108, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Veszkény", 'Lakosság (18-59)' = 498, 'Javított álláskeresők száma'=7)
+data <- add_row(data, 'Város név' = "Veszprémfajsz", 'Lakosság (18-59)' = 137, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Vindornyafok", 'Lakosság (18-59)' = 67, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Visegrád", 'Lakosság (18-59)' = 905, 'Javított álláskeresők száma'=12)
+data <- add_row(data, 'Város név' = "Viszák", 'Lakosság (18-59)' = 155, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Viszló", 'Lakosság (18-59)' = 35, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Vöckönd", 'Lakosság (18-59)' = 47, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Vöröstó", 'Lakosság (18-59)' = 55, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Zalaigrice", 'Lakosság (18-59)' = 68, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Zalaköveskút", 'Lakosság (18-59)' = 15, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Zalameggyes", 'Lakosság (18-59)' = 33, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Zalaszentlőrinc", 'Lakosság (18-59)' = 154, 'Javított álláskeresők száma'=2)
+data <- add_row(data, 'Város név' = "Zalaszentmártón", 'Lakosság (18-59)' = 39, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Zalaszombatfa", 'Lakosság (18-59)' = 25, 'Javított álláskeresők száma'=0)
+data <- add_row(data, 'Város név' = "Zsebeháza", 'Lakosság (18-59)' = 80, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Zselicszentpál", 'Lakosság (18-59)' = 247, 'Javított álláskeresők száma'=3)
+data <- add_row(data, 'Város név' = "Zsennye", 'Lakosság (18-59)' = 49, 'Javított álláskeresők száma'=1)
+data <- add_row(data, 'Város név' = "Zsira", 'Lakosság (18-59)' = 501, 'Javított álláskeresők száma'=7)
+
+
+kable(data) %>%
+  kable_styling(bootstrap_options = c("striped", "hover")) %>%
+  scroll_box(width = "100%", height = "700px")
+```
+
+
+
+**Ahol a 65 év felettiek (100 fő 0-14 éves korú népesség) nem volt kitöltve, oda 0 került, ilyen volt:**
+
+```{r, echo=FALSE}
+library(tibble)
+library(knitr)
+library(kableExtra)
+
+data <- tibble(
+  'Város név' = c("Debréte", "Felsőszenterzsébet", "Iborfia", "Murga", "Pusztaapáti", 
+                  "Szijártóháza", "Tornabarakony", "Varbóc"),
+  'Lakosság (18-59)' = c(10, 7, 150, 120, 200, 80, 60, 300)
+)
+kable(data, format = "html") %>%
+  kable_styling("striped") %>%
+  row_spec(0, bold = TRUE)
+```
