@@ -341,3 +341,24 @@ kable(data, format = "html") %>%
   kable_styling("striped") %>%
   row_spec(0, bold = TRUE)
 ```
+
+
+```{r, echo=FALSE}
+library(tibble)
+library(knitr)
+library(kableExtra)
+
+data <- tibble(
+  'Megye név' =c("Budapest", "Baranya", "Bács-Kiskun", "Békés", "Borsod-abaúj-zemplén", "Csongrád", "Fejér", "Győr-moson-sopron", 
+           "Hajdúbihar", "Heves", "Jász", "Komárom", "Nográd", "Pest", "Somogy", "Szabolcs", "Tolna", "Vas", "Veszprém", "Zala"),
+  '18-59 évesek népessége' = c(947156, 432370, 1131889, 121222, 501317, 147484, 102326, 332712, 143424, 101945, 123341, 161158, 117846, 
+                    397488, 343135, 327541, 223245, 303021, 310839, 270515),
+  '65 év feletti évesek népessége' = c(161.6, 49072.54, 17156.99, 10943.88, 48563.37, 8175.23, 16183.13, 27404.84, 11110.61, 17530.49, 
+                    11661.58, 11145.01, 20104.8, 24245.4, 38129.14, 30563.65, 19094.34, 35818.16, 32254.14, 43993.28),
+  ' Általános iskolai végzettségű nyilvántartott álláskeresők népessége' = c(2467, 7650, 5718, 2249, 10361, 2331, 2127, 3628, 3066, 2968, 3188, 1896, 2976, 5486, 5399, 7250, 3624, 5595, 4953, 5601),
+  
+)
+kable(data, format = "html") %>%
+  kable_styling("striped") %>%
+  row_spec(0, bold = TRUE)
+```
