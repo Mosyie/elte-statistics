@@ -51,7 +51,7 @@ Feladataink közé tartozott az adatok javítása.
 
 Elsősorban, a hiányzó adatokat pótoltuk, ilyen volt sok esetben, az _általános iskolai végzettégű nyilvántartott álláskeresők_ esetében. Ezekhez mindenhova **%-os** módon helyettesítettünk a kiinduló pont az adott nyilvántarott adat volt (**Aba** alapján): 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
 data <- data.frame(
   population = "2832",
@@ -327,7 +327,7 @@ kable(data) %>%
 
 **Ahol a 65 év felettiek (100 fő 0-14 éves korú népesség) nem volt kitöltve, oda 0 került, ilyen volt:**
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(tibble)
 library(knitr)
 library(kableExtra)
@@ -343,10 +343,44 @@ kable(data, format = "html") %>%
 ```
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(tibble)
 library(knitr)
 library(kableExtra)
+library(tidyverse)
+megyek <- c("Budapest", "Baranya", "Bács-Kiskun", "Békés", "Borsod-Abaúj-Zemplén", 
+            "Csongrád", "Fejér", "Győr-Moson-Sopron", "Hajdú-Bihar", "Heves", "Jász", 
+            "Komárom", "Nógrád", "Pest", "Somogy", "Szabolcs", "Tolna", "Vas", 
+            "Veszprém", "Zala")
+
+partok <- c("MSZP-PÁRBESZÉD", "MKKP", "JOBBIK", "FIDESZ", "MOMENTUM", 
+            "DK", "MI HAZÁNK", "MUNKÁSPÁRT", "LMP")
+
+szavazatok <- matrix(
+  c(
+    62019, 26290, 21797, 282583, 119088, 135821, 15921, 2321, 20473,
+    8291, 3610, 7575, 62663, 11799, 23036, 3907, 581, 3551,
+    8378, 3619, 11637, 97011, 11989, 22157, 6046, 646, 3464,
+    6725, 2337, 9440, 57479, 7419, 18264, 4465, 758, 2187,
+    14367, 3654, 23498, 103789, 11643, 31688, 8078, 1182, 3063,
+    16664, 4316, 7777, 71283, 13685, 20070, 7159, 604, 2985,
+    7840, 3816, 10396, 79545, 13519, 23659, 5450, 635, 2921,
+    8124, 3783, 9598, 98139, 14001, 22791, 5403, 583, 3437,
+    8622, 3442, 11122, 89325, 12424, 22056, 4943, 738, 3036,
+    5792, 1874, 10220, 52403, 7105, 16054, 3935, 458, 1736,
+    7364, 2176, 10833, 60304, 6770, 16865, 5958, 787, 1786,
+    5660, 2647, 7431, 50698, 8669, 19888, 3546, 440, 2246,
+    4478, 969, 4162, 35034, 3144, 9635, 2753, 531, 863,
+    25237, 14429, 23667, 229711, 52291, 73977, 14914, 1526, 11336,
+    5510, 1838, 9110, 56626, 6591, 17637, 2943, 437, 1711,
+    10617, 2458, 13969, 102670, 9007, 22770, 4948, 706, 2123,
+    4345, 1461, 4435, 42852, 4817, 10454, 2565, 313, 1362,
+    5612, 2003, 6406, 60808, 7394, 12986, 2396, 284, 1754,
+    7692, 3080, 9714, 70631, 10609, 19615, 4515, 487, 2661,
+    4843, 1861, 6810, 58157, 6917, 15637, 3584, 345, 1895
+  ), 
+  nrow = 20, byrow = TRUE
+)
 
 data <- tibble(
   'Megye név' =c("Budapest", "Baranya", "Bács-Kiskun", "Békés", "Borsod-abaúj-zemplén", "Csongrád", "Fejér", "Győr-moson-sopron", 
@@ -355,10 +389,73 @@ data <- tibble(
                     397488, 343135, 327541, 223245, 303021, 310839, 270515),
   '65 év feletti évesek népessége' = c(161.6, 49072.54, 17156.99, 10943.88, 48563.37, 8175.23, 16183.13, 27404.84, 11110.61, 17530.49, 
                     11661.58, 11145.01, 20104.8, 24245.4, 38129.14, 30563.65, 19094.34, 35818.16, 32254.14, 43993.28),
-  ' Általános iskolai végzettségű nyilvántartott álláskeresők népessége' = c(2467, 7650, 5718, 2249, 10361, 2331, 2127, 3628, 3066, 2968, 3188, 1896, 2976, 5486, 5399, 7250, 3624, 5595, 4953, 5601),
+  'Általános iskolai végzettségű nyilvántartott álláskeresők népessége' = c(2467, 7650, 5718, 2249, 10361, 2331, 2127, 3628, 3066, 2968, 3188, 1896, 2976, 5486, 5399, 7250, 3624, 5595, 4953, 5601),
   
 )
 kable(data, format = "html") %>%
   kable_styling("striped") %>%
   row_spec(0, bold = TRUE)
+
+layout(matrix(c(1, 2), 1, 2, byrow = TRUE), widths = c(1, 2))
+
+for (i in 1:nrow(data)) {
+  megye <- data[i, ]
+  values <- c(
+    megye$`18-59 évesek népessége`,
+    megye$`65 év feletti évesek népessége`,
+    megye$`Általános iskolai végzettségű nyilvántartott álláskeresők népessége`
+  )
+  labels <- c("18-59 évesek", "65 év felettiek", "Álláskeresők")
+  
+
+  # Kördiagram (pie chart)
+  pie(
+    values,
+    labels = labels,
+    main = paste("Népességeloszlás:", megye$`Megye név`),
+    col = c("skyblue", "orange", "lightgreen"),
+    cex.main = 1,  # Címek méretének csökkentése
+    cex = 1  # A címek és az értékek méretének csökkentése
+  )
+  
+  # Hisztogram (barplot)
+  barplot(
+    szavazatok[i, ],
+    names.arg = partok,
+    main = paste("Szavazatok a pártokra -", megyek[i]),
+    col = "lightblue",
+    las = 2,
+    cex.main = 1,  # Címek méretének csökkentése
+    cex.names = 1  # Pártok neveinek betűméretének csökkentése
+  )
+  
+  
+}
+
+szazalekok <- apply(szavazatok, 1, function(row) {
+  total_votes <- sum(row)  # Az összes szavazat a megyére
+  return(row / total_votes * 100)  # Százalékos arány
+})
+
+# Átalakítjuk a százalékokat adatkeretbe, hogy könnyebben kezelhetőek legyenek
+szazalekok_df <- as.data.frame(t(szazalekok))
+colnames(szazalekok_df) <- partok
+rownames(szazalekok_df) <- megyek
+
+# Átlagos szavazati arány minden pártra az összes megyéből
+average_percentage_per_party <- colMeans(szazalekok_df)
+
+average_percentage_tibble <- tibble(Párt = names(average_percentage_per_party),
+                                    Átlagos_százalék = round(average_percentage_per_party, 2))
+
+# Formázott táblázat HTML-ben
+average_percentage_tibble %>%
+  kable(format = "html", col.names = c("Párt", "Átlagos szavazati arány (%)")) %>%
+  kable_styling("striped") %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(2, bold = TRUE, color = "blue")
+
+
+
 ```
+
