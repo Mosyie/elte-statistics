@@ -441,8 +441,13 @@ szazalekok <- apply(szavazatok, 1, function(row) {
 szazalekok_df <- as.data.frame(t(szazalekok))
 colnames(szazalekok_df) <- partok
 rownames(szazalekok_df) <- megyek
+```
 
-# Átlagos szavazati arány minden pártra az összes megyéből
+## Leíró statisztikák
+
+### Átlagos szavazati arány minden pártra az összes megyéből
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 average_percentage_per_party <- colMeans(szazalekok_df)
 
 average_percentage_tibble <- tibble(Párt = names(average_percentage_per_party),
@@ -455,7 +460,53 @@ average_percentage_tibble %>%
   row_spec(0, bold = TRUE) %>%
   column_spec(2, bold = TRUE, color = "blue")
 
+szazalekok <- apply(szavazatok, 1, function(row) {
+  total_votes <- sum(row)  # Az összes szavazat a megyére
+  return(row / total_votes * 100)  # Százalékos arány
+})
 
+# Adatok átalakítása tibble formátumba
+szazalekok_df <- as_tibble(t(szazalekok))
+colnames(szazalekok_df) <- partok
+
+# Statisztikai mutatók kiszámítása
+stats <- tibble(
+  Párt = partok,
+  Medián = apply(szazalekok_df, 2, median),                    # Medián
+  `Alsó kvartilis (Q1)` = apply(szazalekok_df, 2, quantile, 0.25),  # Alsó kvartilis
+  `Felső kvartilis (Q3)` = apply(szazalekok_df, 2, quantile, 0.75),  # Felső kvartilis
+  `Tapasztalati szórás` = apply(szazalekok_df, 2, sd)          # Szórás
+)
+```
+
+###
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+stats %>%
+  kable(format = "html", col.names = c("Párt", "Medián (%)", "Alsó kvartilis (%)", "Felső kvartilis (%)", "Tapasztalati szórás (%)")) %>%
+  kable_styling("striped") %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(2:5, color = "blue")
 
 ```
+**Felső kvartilis:** Ez az a százalék, ami megmutatja, hogy az adott pártra az összes megyét nézve, a pártra eső felső 25%-ba eső szavazati százalék alsó határ.
+
+Például, A JOBBIK felső kvartilise 8,35%, tehát azokban a megyékben, ahol a JOBBIK a saját szavazatai közül a legtöbb szavazatot kapta, ott ez volt az alsó határ.
+
+
+**Alsó kvartilis:** Ez az a százalék, ami megmutatja, hogy az adott pártra az összes megyét nézve, a pártra eső alsó 25%-ba eső szavazati százalék felső határ
+. 
+Például, Az MKKP alsó kvartilise 1,87%, tehát azokban a megyékben, ahol a MKKP a saját szavazatai közül a legkevesebb szavazatot kapta, ott ez volt a felső határ.
+
+
+**Medián:** A párt szavazati arányának középső értéke. Ez azt jelenti, hogy a megyék felében ennél kevesebb, a másik felében ennél több szavazatot kapott.
+
+Például: A FIDESZ mediánja 54,28%, tehát a megyék felében ennél kisebb szavazati százalékot kaptak, a másik felében meg ennél nagyobb szavazati százalékot kaptak.
+
+
+**Tapasztalati szórás:** Az átlagtól való átlagos eltérést jelenti százalékban.
+
+Például: A MOMENTUM-ra leadott szavazatok megyékként a MOMENTUM átlagtól átlagosan 2.71 %-al tér el.
+
 
