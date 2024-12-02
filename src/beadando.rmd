@@ -396,7 +396,7 @@ kable(data, format = "html") %>%
   kable_styling("striped") %>%
   row_spec(0, bold = TRUE)
 
-layout(matrix(c(1, 2), 1, 2, byrow = TRUE), widths = c(1, 2))
+par(mfrow = c(1, 2), mar = c(5, 5, 4, 2) + 0.1, oma = c(0, 0, 2, 0))
 
 for (i in 1:nrow(data)) {
   megye <- data[i, ]
@@ -414,8 +414,8 @@ for (i in 1:nrow(data)) {
     labels = labels,
     main = paste("Népességeloszlás:", megye$`Megye név`),
     col = c("skyblue", "orange", "lightgreen"),
-    cex.main = 1,  # Címek méretének csökkentése
-    cex = 1  # A címek és az értékek méretének csökkentése
+    cex.main = 0.7,  # Címek méretének csökkentése
+    cex = 0.8  # A címek és az értékek méretének csökkentése
   )
   
   # Hisztogram (barplot)
@@ -425,8 +425,8 @@ for (i in 1:nrow(data)) {
     main = paste("Szavazatok a pártokra -", megyek[i]),
     col = "lightblue",
     las = 2,
-    cex.main = 1,  # Címek méretének csökkentése
-    cex.names = 1  # Pártok neveinek betűméretének csökkentése
+    cex.main = 0.7,  # Címek méretének csökkentése
+    cex.names = 0.8  # Pártok neveinek betűméretének csökkentése
   )
   
   
@@ -490,7 +490,7 @@ stats <- tibble(
 
 ```
 
-###
+### Általános leíró statisztikák a párták megyékben kapott szavazataira
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -503,29 +503,29 @@ stats %>%
 ```
 **Felső kvartilis:** Ez az a százalék, ami megmutatja, hogy az adott pártra az összes megyét nézve, a pártra eső felső 25%-ba eső szavazati százalék alsó határ.
 
-Például, A JOBBIK felső kvartilise 8,35%, tehát azokban a megyékben, ahol a JOBBIK a saját szavazatai közül a legtöbb szavazatot kapta, ott ez volt az alsó határ.
+Például, A JOBBIK felső kvartilise 8,35%, tehát azokban a megyékben, ahol a JOBBIK a saját szavazatai közül a legtöbb szavazatot kapta, ott ez volt az alsó határ.<br><br>
 
 
 **Alsó kvartilis:** Ez az a százalék, ami megmutatja, hogy az adott pártra az összes megyét nézve, a pártra eső alsó 25%-ba eső szavazati százalék felső határ
 . 
-Például, Az MKKP alsó kvartilise 1,87%, tehát azokban a megyékben, ahol a MKKP a saját szavazatai közül a legkevesebb szavazatot kapta, ott ez volt a felső határ.
+Például, Az MKKP alsó kvartilise 1,87%, tehát azokban a megyékben, ahol a MKKP a saját szavazatai közül a legkevesebb szavazatot kapta, ott ez volt a felső határ.<br><br>
 
 
 **Medián:** A párt szavazati arányának középső értéke. Ez azt jelenti, hogy a megyék felében ennél kevesebb, a másik felében ennél több szavazatot kapott.
 
-Például: A FIDESZ mediánja 54,28%, tehát a megyék felében ennél kisebb szavazati százalékot kaptak, a másik felében meg ennél nagyobb szavazati százalékot kaptak.
+Például: A FIDESZ mediánja 54,28%, tehát a megyék felében ennél kisebb szavazati százalékot kaptak, a másik felében meg ennél nagyobb szavazati százalékot kaptak.<br><br>
 
 
 **Tapasztalati szórás:** Az átlagtól való átlagos eltérést jelenti százalékban.
 
-Például: A MOMENTUM-ra leadott szavazatok megyékként a MOMENTUM átlagtól átlagosan 2.71 %-al tér el.
+Például: A MOMENTUM-ra leadott szavazatok megyékként a MOMENTUM átlagtól átlagosan 2.71 %-al tér el.<br><br>
 
 **Konfidencia-intervallum alsó határa:** Az a legalacsonyabb érték, amelynél 95%-os eséllyel biztosak lehetünk abban, hogy a párt valódi szavazati aránya nem kisebb egyik megyében sem, mint ez az érték.
 
-Például: A MI HAZÁNK-ra leadott szavazatok alapján az összes megyére nézve 95%-os eséllyel egyik megyében sem volt kisebb a szavazati arány a párta, mint 3,23%.
+Például: A MI HAZÁNK-ra leadott szavazatok alapján az összes megyére nézve 95%-os eséllyel egyik megyében sem volt kisebb a szavazati arány a párta, mint 3,23%.<br><br>
 
 **Konfidencia-intervallum felső határa:** Az a legmagasabb érték, amelynél 95%-os eséllyel biztosak lehetünk abban, hogy a párt valódi szavazati aránya nem nagyobb egyik megyében sem, mint ez az érték.
 
-Például: Az LMP-re leadott szavazatok alapján az összes megyére nézve 95%-os eséllyel egyik megyében sem volt nagyobb a szavazati arány a párta, mint 2,17%.
+Például: Az LMP-re leadott szavazatok alapján az összes megyére nézve 95%-os eséllyel egyik megyében sem volt nagyobb a szavazati arány a párta, mint 2,17%.<br><br>
 
 
