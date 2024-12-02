@@ -470,13 +470,24 @@ szazalekok_df <- as_tibble(t(szazalekok))
 colnames(szazalekok_df) <- partok
 
 # Statisztikai mutatók kiszámítása
+alpha <- 0.05  # 95%-os konfidenciaszint
+t_value <- qt(1 - alpha / 2, df = nrow(szazalekok_df) - 1)  # t-eloszlás kritikus értéke
+
 stats <- tibble(
   Párt = partok,
-  Medián = apply(szazalekok_df, 2, median),                    # Medián
-  `Alsó kvartilis (Q1)` = apply(szazalekok_df, 2, quantile, 0.25),  # Alsó kvartilis
-  `Felső kvartilis (Q3)` = apply(szazalekok_df, 2, quantile, 0.75),  # Felső kvartilis
-  `Tapasztalati szórás` = apply(szazalekok_df, 2, sd)          # Szórás
+  Medián = apply(szazalekok_df, 2, median),                      # Medián
+  `Alsó kvartilis (Q1)` = apply(szazalekok_df, 2, quantile, 0.25), # Alsó kvartilis
+  `Felső kvartilis (Q3)` = apply(szazalekok_df, 2, quantile, 0.75), # Felső kvartilis
+  `Tapasztalati szórás` = apply(szazalekok_df, 2, sd),           # Tapasztalati szórás
+  `Szórás` = apply(szazalekok_df, 2, function(x) sqrt(var(x))),  # Szórás
+  CI_lower = apply(szazalekok_df, 2, function(x) {
+    mean(x) - t_value * sd(x) / sqrt(length(x))
+  }),  # Konfidencia-intervallum alsó határa
+  CI_upper = apply(szazalekok_df, 2, function(x) {
+    mean(x) + t_value * sd(x) / sqrt(length(x))
+  })   # Konfidencia-intervallum felső határa
 )
+
 ```
 
 ###
@@ -484,10 +495,10 @@ stats <- tibble(
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 stats %>%
-  kable(format = "html", col.names = c("Párt", "Medián (%)", "Alsó kvartilis (%)", "Felső kvartilis (%)", "Tapasztalati szórás (%)")) %>%
+  kable(format = "html", col.names = c("Párt", "Medián (%)", "Alsó kvartilis (%)", "Felső kvartilis (%)", "Tapasztalati szórás (%)", "Szórás (%)", " Konfidencia-intervallum alsó határa", " Konfidencia-intervallum felső határa" )) %>%
   kable_styling("striped") %>%
   row_spec(0, bold = TRUE) %>%
-  column_spec(2:5, color = "blue")
+  column_spec(2:8, color = "blue")
 
 ```
 **Felső kvartilis:** Ez az a százalék, ami megmutatja, hogy az adott pártra az összes megyét nézve, a pártra eső felső 25%-ba eső szavazati százalék alsó határ.
@@ -508,5 +519,13 @@ Például: A FIDESZ mediánja 54,28%, tehát a megyék felében ennél kisebb sz
 **Tapasztalati szórás:** Az átlagtól való átlagos eltérést jelenti százalékban.
 
 Például: A MOMENTUM-ra leadott szavazatok megyékként a MOMENTUM átlagtól átlagosan 2.71 %-al tér el.
+
+**Konfidencia-intervallum alsó határa:** Az a legalacsonyabb érték, amelynél 95%-os eséllyel biztosak lehetünk abban, hogy a párt valódi szavazati aránya nem kisebb egyik megyében sem, mint ez az érték.
+
+Például: A MI HAZÁNK-ra leadott szavazatok alapján az összes megyére nézve 95%-os eséllyel egyik megyében sem volt kisebb a szavazati arány a párta, mint 3,23%.
+
+**Konfidencia-intervallum felső határa:** Az a legmagasabb érték, amelynél 95%-os eséllyel biztosak lehetünk abban, hogy a párt valódi szavazati aránya nem nagyobb egyik megyében sem, mint ez az érték.
+
+Például: Az LMP-re leadott szavazatok alapján az összes megyére nézve 95%-os eséllyel egyik megyében sem volt nagyobb a szavazati arány a párta, mint 2,17%.
 
 
