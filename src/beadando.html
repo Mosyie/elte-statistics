@@ -3377,6 +3377,9 @@ Varbóc
 </tr>
 </tbody>
 </table>
+</div>
+<div id="a-népességi-adatok-megyénként" class="section level2">
+<h2>A népességi adatok megyénként</h2>
 <table class="table table-striped" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -4074,6 +4077,96 @@ ez az érték.</p>
 <p>Például: Az LMP-re leadott szavazatok alapján az összes megyére nézve
 95%-os eséllyel egyik megyében sem volt nagyobb a szavazati arány a
 párta, mint 2,17%.<br><br></p>
+</div>
+</div>
+<div id="hipotézisvizsgálat-konfidencia-szint-95" class="section level2">
+<h2>Hipotézisvizsgálat (KONFIDENCIA-SZINT 95%)</h2>
+<div id="van-jelenős-külöbség-a-pártok-szavazati-között" class="section level3">
+<h3>Van jelenős külöbség a pártok szavazati között?</h3>
+<div id="nullhipotézis-h₀-a-pártok-szavazatainak-átlaga-egyenlő." class="section level4">
+<h4>Nullhipotézis (H₀): A pártok szavazatainak átlaga egyenlő.</h4>
+</div>
+<div id="alternatív-hipotézis-h₁-legalább-egy-párt-szavazatainak-átlaga-szignifikánsan-eltér." class="section level4">
+<h4>Alternatív hipotézis (H₁): Legalább egy párt szavazatainak átlaga
+szignifikánsan eltér.</h4>
+<pre><code>## 
+##  Chi-squared test for given probabilities
+## 
+## data:  party_osszegek
+## X-squared = 6288509, df = 8, p-value &lt; 2.2e-16</code></pre>
+<p>Mivel a p-érték 2.2e-16 &lt; 0.05 konfidenciaszint, ezért elutasítjuk
+a nullhipotézist.</p>
+<p>Vagyis volt statisztikailagi szignifikáns különbség a pártok
+szavazatainak között.</p>
+</div>
+</div>
+<div id="arányosak-e-a-fidesz-szavazatai-a-65-év-feletti-lakosság-arányával-megyénként" class="section level3">
+<h3>Arányosak-e a FIDESZ szavazatai a 65 év feletti lakosság arányával
+megyénként?</h3>
+<div id="nullhipotézis-h₀-nincs-arányos-kapcsolat-a-fidesz-szavazatai-és-a-65-év-feletti-lakosság-között." class="section level4">
+<h4>Nullhipotézis (H₀): Nincs arányos kapcsolat a FIDESZ szavazatai és a
+65 év feletti lakosság között.</h4>
+</div>
+<div id="alternatív-hipotézis-h₁-van-arányos-kapcssolat-a-fidesz-szavazatai-és-65-év-feletti-lakosság-között." class="section level4">
+<h4>Alternatív hipotézis (H₁): Van arányos kapcssolat a FIDESZ
+szavazatai és 65 év feletti lakosság között.</h4>
+<pre><code>## 
+##  Paired t-test
+## 
+## data:  fidesz_szavazatok and data$`65 év feletti évesek népessége`
+## t = 4.342, df = 19, p-value = 0.0003512
+## alternative hypothesis: true mean difference is not equal to 0
+## 95 percent confidence interval:
+##  33366.55 95473.33
+## sample estimates:
+## mean difference 
+##        64419.94</code></pre>
+<p>Mivel a p-érték 0.0003512 &lt; 0.05 konfidenciaszint, ezért
+elutasítjuk a nullhipotézist.</p>
+<p>Vagyis van statsztikai kapcsolat a FIDESZ szavazatai és a 65 év
+feletti lakosság között.</p>
+</div>
+</div>
+<div id="szórások-összehasonlítása-és-különbségvizsgálata-a-mszp-és-a-dk-szavazataiban" class="section level3">
+<h3>Szórások összehasonlítása és különbségvizsgálata a MSZP és a DK
+szavazataiban</h3>
+<div id="nullhipotézis-h₀-a-két-csoport-mszp-és-dk-szavazatai-szórásai-megegyeznek." class="section level4">
+<h4>Nullhipotézis (H₀): A két csoport (MSZP és DK szavazatai) szórásai
+megegyeznek.</h4>
+</div>
+<div id="ellenhipotézis-h₁-a-két-csoport-mszp-és-dk-szavazatai-szórásai-nem-egyeznek-meg." class="section level4">
+<h4>Ellenhipotézis (H₁): A két csoport (MSZP és DK szavazatai) szórásai
+nem egyeznek meg.</h4>
+<pre><code>## 
+##  F test to compare two variances
+## 
+## data:  mszp_szavaztok and dk_szavazatok
+## F = 0.20281, num df = 19, denom df = 19, p-value = 0.00106
+## alternative hypothesis: true ratio of variances is not equal to 1
+## 95 percent confidence interval:
+##  0.08027522 0.51239306
+## sample estimates:
+## ratio of variances 
+##          0.2028114</code></pre>
+<p>Mivel az F-próba eredménye esetén a p-érték 0.00106 &lt; 0.05
+konfidenciaszint, ez azt jelenti, hogy a szórások nem egyeznek meg,
+tehát Welch-próbát kell alkalmaznunk</p>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  mszp_szavaztok and dk_szavazatok
+## t = -2.3251, df = 26.402, p-value = 0.02801
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -30782.265  -1905.735
+## sample estimates:
+## mean of x mean of y 
+##     11409     27753</code></pre>
+<p>Mivel a Welch-próba eredményeként kijött p-érték = 0.02801 &gt; 0.05
+konfidenciaszint, így nem tudjuk elvetni a nullhipotézist, a két párt
+közötti szavazti szórásokban nincs statisztikailag szignifikáns
+külöbség.</p>
+</div>
 </div>
 </div>
 

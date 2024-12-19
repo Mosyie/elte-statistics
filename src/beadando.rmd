@@ -5,7 +5,7 @@ output: html_document
 
 ## Szerzők
 
-```{r,, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
 authors <- data.frame(
   Név = c("Mosonyi Martin", "Ócsai Máté Zsigmond"),
@@ -342,6 +342,7 @@ kable(data, format = "html") %>%
   row_spec(0, bold = TRUE)
 ```
 
+## A népességi adatok megyénként
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(tibble)
@@ -528,4 +529,68 @@ Például: A MI HAZÁNK-ra leadott szavazatok alapján az összes megyére nézv
 
 Például: Az LMP-re leadott szavazatok alapján az összes megyére nézve 95%-os eséllyel egyik megyében sem volt nagyobb a szavazati arány a párta, mint 2,17%.<br><br>
 
+## Hipotézisvizsgálat (KONFIDENCIA-SZINT 95%)
 
+
+### Van jelenős külöbség a pártok szavazati között?
+
+#### Nullhipotézis (H₀): A pártok szavazatainak átlaga egyenlő.
+#### Alternatív hipotézis (H₁): Legalább egy párt szavazatainak átlaga szignifikánsan eltér.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+party_osszegek = colSums(szavazatok)
+
+expected = sum(party_osszegek) / length(partok)
+
+chisq.test(party_osszegek, p = rep(1/length(partok), length(partok)))
+```
+
+Mivel a p-érték 2.2e-16 < 0.05 konfidenciaszint, ezért elutasítjuk a nullhipotézist.
+
+Vagyis volt statisztikailagi szignifikáns különbség a pártok szavazatainak között.
+
+### Arányosak-e a FIDESZ szavazatai a 65 év feletti lakosság arányával megyénként?
+
+#### Nullhipotézis (H₀): Nincs arányos kapcsolat a FIDESZ szavazatai és a 65 év feletti lakosság között.
+#### Alternatív hipotézis (H₁): Van arányos kapcssolat a FIDESZ szavazatai és 65 év feletti lakosság között.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+fidesz_szavazatok <- szavazatok[, 4] 
+
+t_test <- t.test(fidesz_szavazatok, data$`65 év feletti évesek népessége`, paired = TRUE)
+t_test
+
+```
+
+Mivel a p-érték 0.0003512 < 0.05 konfidenciaszint, ezért elutasítjuk a nullhipotézist.
+
+Vagyis van statsztikai kapcsolat a FIDESZ szavazatai és a 65 év feletti lakosság között.
+
+### Szórások összehasonlítása és különbségvizsgálata a MSZP és a DK szavazataiban
+
+#### Nullhipotézis (H₀): A két csoport (MSZP és DK szavazatai) szórásai megegyeznek.
+#### Ellenhipotézis (H₁): A két csoport (MSZP és DK szavazatai) szórásai nem egyeznek meg.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+mszp_szavaztok = szavazatok[, 1]
+
+dk_szavazatok = szavazatok[, 6]
+
+f_test = var.test(mszp_szavaztok, dk_szavazatok)
+f_test
+
+```
+
+Mivel az F-próba eredménye esetén a p-érték 0.00106 < 0.05 konfidenciaszint, ez azt jelenti, hogy a szórások nem egyeznek meg, tehát Welch-próbát kell alkalmaznunk
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+welch_test <- t.test(mszp_szavaztok, dk_szavazatok, var.equal = FALSE)
+welch_test
+
+```
+
+Mivel a Welch-próba eredményeként kijött p-érték = 0.02801 > 0.05 konfidenciaszint, így nem tudjuk elvetni a nullhipotézist, a két párt közötti szavazti szórásokban nincs statisztikailag szignifikáns külöbség.
