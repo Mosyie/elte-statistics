@@ -594,3 +594,47 @@ welch_test
 ```
 
 Mivel a Welch-próba eredményeként kijött p-érték = 0.02801 > 0.05 konfidenciaszint, így nem tudjuk elvetni a nullhipotézist, a két párt közötti szavazti szórásokban nincs statisztikailag szignifikáns külöbség.
+
+### FIDESZ szavazati arány és népességi mutatók vizsgálata lineáris regresszióval
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# Adatok kombinálása modellezéshez
+# Adatok egyesítése
+merged_data <- data %>%
+  mutate(FIDESZ_szavazatok = szavazatok[, 4]) %>%  # FIDESZ szavazatok hozzáadása
+  mutate(FIDESZ_arany = FIDESZ_szavazatok / rowSums(szavazatok) * 100)  # Százalékos arány
+
+# Lineáris regresszió illesztése
+lm_model <- lm(FIDESZ_arany ~ `18-59 évesek népessége` + `65 év feletti évesek népessége` + 
+                 `Általános iskolai végzettségű nyilvántartott álláskeresők népessége`, 
+               data = merged_data)
+
+# Modell összefoglalása
+summary(lm_model)
+
+par(mfrow = c(2, 2))
+plot(lm_model)
+```
+
+# Népességi és Szavazati Adatok Elemzése
+
+## A népességi adatok elemzése
+A különböző megyékben a 18-59 évesek, 65 év felettiek és az alacsony iskolai végzettségű nyilvántartott álláskeresők adatai alapvető demográfiai és munkaerőpiaci jellemzőket tükröznek. Az adatok alapján Budapest és nagyobb megyék, mint Borsod-Abaúj-Zemplén és Bács-Kiskun, magasabb álláskeresői számot és idős populációt mutatnak, ami fontos indikátor a munkaerőpiaci helyzet elemzéséhez.
+
+## Szavazatok és politikai preferenciák
+A szavazatok megoszlása az egyes pártok között jelentős különbségeket mutat. A legnagyobb támogatottságot a FIDESZ és az MSZP-PÁRBESZÉD kapták a legnagyobb megyékben, míg a kisebb pártok, mint az MKKP és MI HAZÁNK, jelentősebb jelenléttel bírnak egyes megyékben. Az adatok alátámasztják a politikai preferenciák regionális eltéréseit, különösen a kisebb településeken.
+
+## Szavazati arányok statisztikai elemzése
+A statisztikai elemzés során az alábbi mérőszámokat vizsgáltuk:
+
+- **Átlagos szavazati arány**: A FIDESZ és MSZP-PÁRBESZÉD átlagos támogatottsága jelentősen meghaladja a kisebb pártokét. A szavazatok átlagos eloszlása megerősíti, hogy a nagy pártok dominálják a politikai tájat.
+
+- **Medián**: A medián szavazati arányok segítenek pontosabb képet adni a leggyakoribb politikai preferenciáról. A medián értékek a szavazatok eloszlásának központját mutatják, így érzékeltetve a pártok támogatottságának konszolidálódott helyzetét.
+
+- **Kvartilisek**: Az alsó és felső kvartilisek alapján meghatározható a szavazatok szóródása, és azt is, hogy mely pártok szerepelnek a legszélesebb támogatottsággal. Az alacsonyabb kvartilisek a kisebb pártokra vonatkoznak, míg a felsők a nagyobb pártok dominanciáját tükrözik.
+
+- **Tapasztalati szórás**: A szórás az egyes megyékben tapasztalt szavazati különbségek mértékét mutatja. Minél nagyobb a szórás, annál nagyobbak a regionális eltérések a pártok támogatottságában.
+
+- **Konfidencia-intervallumok**: A szavazati arányok konfidencia-intervalluma segítséget nyújt abban, hogy megbecsüljük a pártok támogatottságát az egész populációra vonatkozóan, figyelembe véve a minta variabilitását. A konfidencia-intervallumok biztosítják a statisztikai következtetések megbízhatóságát.
+
+## Összegzés
+Az elemzés rávilágít a politikai táj regionális különbségeire, ahol a nagyobb városok és megyék erősebben támogatják a nagy pártokat (FIDESZ, MSZP-PÁRBESZÉD), míg a kisebb települések esetében a kisebb pártok is jelentős szerepet játszanak. A statisztikai elemzés segít jobban megérteni a szavazati arányok eloszlását és a politikai preferenciák dinamikáját, amelyek kulcsfontosságúak a jövőbeli politikai trendek és választási eredmények előrejelzésében.
